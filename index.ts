@@ -2,16 +2,19 @@
 import { serve } from "https://deno.land/std@0.119.0/http/server.ts";
 
 async function handler(_req: Request): Promise<Response> {
+
   const user_guess = await extractGuess(_req);
-  console.log("user_guess : ", user_guess);
   const word_to_find = "chien";
   const score = await similarity(user_guess, word_to_find);
-  console.log("score : ", score);
 
-  return new Response(`Similarity score between ${user_guess} and ${word_to_find} : ${score}`);
+  return responseBuilder(score, user_guess, word_to_find);
 }
 
-const similarity = async (word1, word2) => {
+const responseBuilder = (similarityScore: Number, userGuess:String, wordToFind:String) => {
+  return new Response(`Similarity score between ${userGuess} and ${wordToFind} : ${similarityScore}`);
+}
+
+const similarity = async (word1:String, word2:String) => {
 
   const body = {
     sim1: word1,
@@ -33,7 +36,6 @@ const similarity = async (word1, word2) => {
   const similarityResponseJson = await similarityResponse.json();
   return Number(similarityResponseJson.simscore);
 }
-
 
 const extractGuess = async (req: Request) => {
   const slackPayload = await req.formData();
